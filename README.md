@@ -86,7 +86,7 @@ using Docker.DotNet.HR.Extended.Models
 DockerClient client = new DockerClientConfiguration(
     new SshClientBuilder(
 	new SshCredentials("privateKey", "password"),
-    new Uri("ssh://{user}@{host}"))
+    new Uri("ssh://{user}@{host}")))
      .CreateClient();
 ```
 
