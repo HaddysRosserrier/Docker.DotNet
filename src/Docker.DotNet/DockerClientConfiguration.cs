@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Docker.DotNet.HR.Extended.Factories;
+using Docker.DotNet.HR.Extended.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,31 +14,21 @@ namespace Docker.DotNet
             TimeSpan defaultTimeout = default,
             TimeSpan namedPipeConnectTimeout = default,
             IReadOnlyDictionary<string, string> defaultHttpRequestHeaders = null)
-            : this(GetLocalDockerEndpoint(), credentials, defaultTimeout, namedPipeConnectTimeout, defaultHttpRequestHeaders)
+            : this(DockerClientFactory.GetDockerClientBuilder(credentials), defaultTimeout, defaultHttpRequestHeaders)
         {
         }
 
         public DockerClientConfiguration(
-            Uri endpoint,
-            Credentials credentials = null,
+            IDockerClientBuilder clientHandler,
             TimeSpan defaultTimeout = default,
-            TimeSpan namedPipeConnectTimeout = default,
             IReadOnlyDictionary<string, string> defaultHttpRequestHeaders = null)
         {
-            if (endpoint == null)
-            {
-                throw new ArgumentNullException(nameof(endpoint));
-            }
-
             if (defaultTimeout < Timeout.InfiniteTimeSpan)
             {
                 throw new ArgumentException("Default timeout must be greater than -1", nameof(defaultTimeout));
             }
 
-            EndpointBaseUri = endpoint;
-            Credentials = credentials ?? new AnonymousCredentials();
             DefaultTimeout = TimeSpan.Equals(default, defaultTimeout) ? TimeSpan.FromSeconds(100) : defaultTimeout;
-            NamedPipeConnectTimeout = TimeSpan.Equals(default, namedPipeConnectTimeout) ? TimeSpan.FromMilliseconds(100) : namedPipeConnectTimeout;
             DefaultHttpRequestHeaders = defaultHttpRequestHeaders ?? new Dictionary<string, string>();
         }
 
@@ -45,9 +37,7 @@ namespace Docker.DotNet
         /// </summary>
         public IReadOnlyDictionary<string, string> DefaultHttpRequestHeaders { get; }
 
-        public Uri EndpointBaseUri { get; }
-
-        public Credentials Credentials { get; }
+        public IDockerClientBuilder ClientBuilder { get; }
 
         public TimeSpan DefaultTimeout { get; }
 
@@ -60,13 +50,8 @@ namespace Docker.DotNet
 
         public void Dispose()
         {
-            Credentials.Dispose();
+            ClientBuilder.Dispose();
         }
 
-        private static Uri GetLocalDockerEndpoint()
-        {
-            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            return isWindows ? new Uri("npipe://./pipe/docker_engine") : new Uri("unix:/var/run/docker.sock");
-        }
     }
 }
