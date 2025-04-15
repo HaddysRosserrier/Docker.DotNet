@@ -12,7 +12,6 @@ namespace Docker.DotNet
             Uri uri = null,
             Credentials credentials = null,
             TimeSpan defaultTimeout = default,
-            TimeSpan namedPipeConnectTimeout = default,
             IReadOnlyDictionary<string, string> defaultHttpRequestHeaders = null)
             : this(DockerClientFactory.GetDockerClientBuilder(credentials, uri), defaultTimeout, defaultHttpRequestHeaders)
         {
@@ -40,8 +39,6 @@ namespace Docker.DotNet
         public IDockerClientBuilder ClientBuilder { get; }
 
         public TimeSpan DefaultTimeout { get; }
-
-        public TimeSpan NamedPipeConnectTimeout { get; }
 
         public DockerClient CreateClient(Version requestedApiVersion = null)
         {
