@@ -82,13 +82,23 @@ Allows specific connection protocol
 ```csharp
 // Ssh connection protocol
 using Docker.DotNet;
-using Docker.DotNet.HR.Extended.Models
-DockerClient client = new DockerClientConfiguration(
-    new SshClientBuilder(
-	new SshCredentials("privateKey", "password"),
-    new Uri("ssh://{user}@{host}")))
-     .CreateClient();
+using Docker.DotNet.HR.Extended.Models;
+var credentials = new SshCredentials("privateKey", "password");
+var uri = new Uri("ssh://{user}@{host}");
+IDockerClientBuilder builder = new SshClientBuilder(credentials, uri);
+DockerClient client = new DockerClientConfiguration(builder).CreateClient();
 ```
+
+Allows specific implementation via IDockerClientBuilder
+
+Currently available implementation: 
+1. NPipeClientBuilder: npipe
+2. ClientBuilder: http/https/tcp 
+3. UnixClientBuilder: unix
+4. SshClientBuilder: ssh
+
+
+## Accessing Docker API 
 
 #### Example: List containers
 
