@@ -75,6 +75,21 @@ DockerClient client = new DockerClientConfiguration(
      .CreateClient();
 ```
 
+##  [HR] Extended functionalities introduced in this variation 
+
+Allows specific connection protocol 
+
+```csharp
+// Ssh connection protocol
+using Docker.DotNet;
+using Docker.DotNet.HR.Extended.Models
+DockerClient client = new DockerClientConfiguration(
+    new SshClientBuilder(
+	new SshCredentials("privateKey", "password"),
+    new Uri("ssh://{user}@{host}"))
+     .CreateClient();
+```
+
 #### Example: List containers
 
 ```csharp

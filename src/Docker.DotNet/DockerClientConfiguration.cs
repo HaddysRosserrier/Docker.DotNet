@@ -2,7 +2,6 @@
 using Docker.DotNet.HR.Extended.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Docker.DotNet
@@ -10,11 +9,12 @@ namespace Docker.DotNet
     public class DockerClientConfiguration : IDisposable
     {
         public DockerClientConfiguration(
+            Uri uri = null,
             Credentials credentials = null,
             TimeSpan defaultTimeout = default,
             TimeSpan namedPipeConnectTimeout = default,
             IReadOnlyDictionary<string, string> defaultHttpRequestHeaders = null)
-            : this(DockerClientFactory.GetDockerClientBuilder(credentials), defaultTimeout, defaultHttpRequestHeaders)
+            : this(DockerClientFactory.GetDockerClientBuilder(credentials, uri), defaultTimeout, defaultHttpRequestHeaders)
         {
         }
 

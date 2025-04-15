@@ -28,7 +28,7 @@ public sealed class SshCredentials(string privateKey, string password = null) : 
         return false;
     }
 
-    private static PrivateKeyFile BuildPrivateKey(string privateKey, string? password)
+    private static PrivateKeyFile BuildPrivateKey(string privateKey, string password)
     {
         var stream = new MemoryStream();
         using var writer = new StreamWriter(stream);

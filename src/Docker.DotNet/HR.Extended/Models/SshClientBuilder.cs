@@ -1,30 +1,26 @@
 ﻿using System.Net.Http;
 using System;
-using Microsoft.Net.Http.Client;
 using Docker.DotNet.HR.Extended.Interfaces;
+using Microsoft.Net.Http.Client;
 
 namespace Docker.DotNet.HR.Extended.Models
 {
-    public sealed class SshClientBuilderClientBuilder(Credentials credentials, Uri uri) : IDockerClientBuilder
+    public sealed class SshClientBuilder(SshCredentials credentials, Uri uri) : IDockerClientBuilder
     {
         public HttpMessageHandler BuildHandler()
         {
-            return credentials.GetHandler(new ManagedHandler());
+            var username = uri.UserInfo;
+            if (username.Contains(":"))
+            {
+                throw new ArgumentException("ssh:// protocol only supports authentication with private keys");
+            }
+            
+            return credentials.GetHandler(new ManagedHandler(credentials.GetSshStreamOpener(username)));
         }
 
         public Uri BuildUri()
         {
-            if (uri.Scheme.ToLowerInvariant() == "https")
-            {
-                return uri;
-            }
-
-            var builder = new UriBuilder(uri)
-            {
-                Scheme = credentials.IsTlsCredentials() ? "https" : "http"
-            };
-
-            return builder.Uri;
+            return new UriBuilder("http", uri.Host, uri.IsDefaultPort ? 22 : uri.Port).Uri;
         }
 
         public void Dispose()
