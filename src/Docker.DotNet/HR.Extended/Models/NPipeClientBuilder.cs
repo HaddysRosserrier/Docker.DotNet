@@ -1,10 +1,8 @@
-﻿using Docker.DotNet.HR.Extended.Interfaces;
-using Microsoft.Net.Http.Client;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO.Pipes;
 using System.Net.Http;
-using System.Text;
+using Microsoft.Net.Http.Client;
+using Docker.DotNet.HR.Extended.Interfaces;
 
 namespace Docker.DotNet.HR.Extended.Models
 {
@@ -27,13 +25,10 @@ namespace Docker.DotNet.HR.Extended.Models
                 serverName = ".";
             }
 
-            var pipeName = uri.Segments[2];
-
-            uri = new UriBuilder("http", pipeName).Uri;
             return credentials.GetHandler(new ManagedHandler(async (host, port, cancellationToken) =>
             {
                 var timeout = (int)_namedPipeConnectTimeout.TotalMilliseconds;
-                var stream = new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                var stream = new NamedPipeClientStream(serverName, _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
                 var dockerStream = new DockerPipeStream(stream);
 
                 await stream.ConnectAsync(timeout, cancellationToken)
@@ -45,7 +40,7 @@ namespace Docker.DotNet.HR.Extended.Models
 
         public Uri BuildUri()
         {
-            throw new NotImplementedException();
+            return new UriBuilder("http", _pipeName).Uri;
         }
 
         public void Dispose()
