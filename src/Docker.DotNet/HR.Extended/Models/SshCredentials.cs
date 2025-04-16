@@ -12,9 +12,18 @@ namespace Docker.DotNet.HR.Extended.Models;
 public sealed class SshCredentials(string privateKey, string password = null) : Credentials
 {
     private readonly PrivateKeyFile _privateKey = BuildPrivateKey(privateKey, password);
+    private PrivateKeyAuthenticationMethod _privateKeyAuthMethod;
+    private SshClient _client;
 
     public override void Dispose()
     {
+        _privateKeyAuthMethod?.Dispose();
+        _privateKeyAuthMethod = null;
+
+        _client?.Disconnect();
+        _client?.Dispose();
+        _client = null;
+
         _privateKey.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -42,12 +51,12 @@ public sealed class SshCredentials(string privateKey, string password = null) : 
     public ManagedHandler.StreamOpener GetSshStreamOpener(string username)
     {
         return (string host, int port, CancellationToken cancellationToken) => {
-            var authMethod = new PrivateKeyAuthenticationMethod(username, _privateKey);
-            var connectionInfo = new ConnectionInfo(host, port, username, authMethod);
-            var client = new SshClient(connectionInfo);
-            client.Connect();
+            _privateKeyAuthMethod ??= new PrivateKeyAuthenticationMethod(username, _privateKey);
+            var connectionInfo = new ConnectionInfo(host, port, username, _privateKeyAuthMethod);
+            _client ??= new SshClient(connectionInfo);
+            _client.Connect();
 
-            var cmd = client.CreateCommand("docker system dial-stdio");
+            var cmd = _client.CreateCommand("docker system dial-stdio");
             cmd.BeginExecute();
 
             var result = new ReadWriteStreamUtils(cmd.OutputStream, cmd.CreateInputStream());
