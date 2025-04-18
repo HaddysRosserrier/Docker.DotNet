@@ -27,6 +27,7 @@ namespace Docker.DotNet
                 throw new ArgumentException("Default timeout must be greater than -1", nameof(defaultTimeout));
             }
 
+            ClientBuilder = clientHandler;
             DefaultTimeout = TimeSpan.Equals(default, defaultTimeout) ? TimeSpan.FromSeconds(100) : defaultTimeout;
             DefaultHttpRequestHeaders = defaultHttpRequestHeaders ?? new Dictionary<string, string>();
         }
