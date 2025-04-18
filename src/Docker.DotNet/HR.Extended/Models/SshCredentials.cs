@@ -55,8 +55,12 @@ public sealed class SshCredentials(string privateKey, string password = null) : 
             _privateKeyAuthMethod ??= new PrivateKeyAuthenticationMethod(username, _privateKey);
             var connectionInfo = new ConnectionInfo(host, port, username, _privateKeyAuthMethod);
             _client ??= new SshClient(connectionInfo);
-            _client.Connect();
 
+            if (!_client.IsConnected)
+            {
+                _client.Connect();
+            }
+           
             var cmd = _client.CreateCommand("docker system dial-stdio");
             cmd.BeginExecute();
 
