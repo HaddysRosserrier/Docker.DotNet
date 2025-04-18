@@ -1,10 +1,7 @@
 ﻿using Docker.DotNet.HR.Extended.Interfaces;
 using Docker.DotNet.HR.Extended.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Docker.DotNet.HR.Extended.Factories
 {

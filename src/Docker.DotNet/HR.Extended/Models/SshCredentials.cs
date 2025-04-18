@@ -13,7 +13,7 @@ public sealed class SshCredentials(string privateKey, string password = null) : 
 {
     private readonly PrivateKeyFile _privateKey = BuildPrivateKey(privateKey, password);
     private PrivateKeyAuthenticationMethod _privateKeyAuthMethod;
-    private SshClient _client;
+    private ISshClient _client;
 
     public override void Dispose()
     {
@@ -27,6 +27,7 @@ public sealed class SshCredentials(string privateKey, string password = null) : 
         _privateKey.Dispose();
         GC.SuppressFinalize(this);
     }
+
     public override HttpMessageHandler GetHandler(HttpMessageHandler innerHandler)
     {
         return innerHandler;
