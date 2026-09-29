@@ -1,8 +1,17 @@
-﻿# .NET Client for Docker Remote API
+﻿# HR.Extended.Docker.DotNet
 
-This library allows you to interact with [Docker Remote API][docker-remote-api]  endpoints in your .NET applications.
+[![NuGet latest release](https://img.shields.io/nuget/v/HR.Extended.Docker.DotNet.svg)](https://www.nuget.org/packages/HR.Extended.Docker.DotNet)
+
+An extended fork of [Docker.DotNet](https://github.com/dotnet/Docker.DotNet), the .NET client for the [Docker Remote API][docker-remote-api].
 
 It is fully asynchronous, designed to be non-blocking and object-oriented way to interact with your Docker daemon programmatically.
+
+On top of the upstream library, this package adds:
+
+- **SSH connections** (`ssh://user@host`) to remote Docker daemons, tunnelled through `docker system dial-stdio`
+- **Pluggable transports** via `IDockerClientBuilder`, with builders for npipe, http/https/tcp, unix and ssh
+
+The public API and namespaces (`Docker.DotNet`) are the same as upstream, so existing code keeps working. Because the assembly is also named `Docker.DotNet`, use this package **instead of** `Docker.DotNet`, not alongside it.
 
 ## Versioning
 
@@ -16,31 +25,21 @@ or non-breaking feature additions.
 
 ## Installation
 
-[![NuGet latest release](https://img.shields.io/nuget/v/Docker.DotNet.svg)](https://www.nuget.org/packages/Docker.DotNet)
-
 You can add this library to your project using [NuGet][nuget].
+
+**.NET Command Line Interface**
+Run the following command from your favorite shell or terminal:
+
+> dotnet add package HR.Extended.Docker.DotNet
 
 **Package Manager Console**
 Run the following command in the “Package Manager Console”:
 
-> PM> Install-Package Docker.DotNet
+> PM> Install-Package HR.Extended.Docker.DotNet
 
 **Visual Studio**
-Right click to your project in Visual Studio, choose “Manage NuGet Packages” and search for ‘Docker.DotNet’ and click ‘Install’.
+Right click to your project in Visual Studio, choose “Manage NuGet Packages”, search for ‘HR.Extended.Docker.DotNet’ and click ‘Install’.
 ([see NuGet Gallery][nuget-gallery].)
-
-**.NET Core Command Line Interface**
-Run the following command from your favorite shell or terminal:
-
-> dotnet add package Docker.DotNet
-
-**Development Builds**
-
-![](https://ci.appveyor.com/api/projects/status/github/Microsoft/Docker.DotNet?branch=master&svg=true)
-
-If you intend to use development builds of Docker.DotNet and don't want to compile the code yourself you can add the package source below to Visual Studio or your Nuget.Config.
-
-> https://ci.appveyor.com/nuget/docker-dotnet-hojfmn6hoed7
 
 ## Usage
 
@@ -75,27 +74,38 @@ DockerClient client = new DockerClientConfiguration(
      .CreateClient();
 ```
 
-##  [HR] Extended functionalities introduced in this variation 
+## Extended features
 
-Allows specific connection protocol 
+### SSH connections
+
+Connect to a remote Docker daemon over SSH using private key authentication. The remote user must be able to run `docker system dial-stdio`.
 
 ```csharp
-// Ssh connection protocol
 using Docker.DotNet;
+using Docker.DotNet.HR.Extended.Interfaces;
 using Docker.DotNet.HR.Extended.Models;
-var credentials = new SshCredentials("privateKey", "password");
-var uri = new Uri("ssh://{user}@{host}");
+
+// Pass the private key *contents* (not a file path); the passphrase is optional.
+var privateKey = File.ReadAllText("/home/me/.ssh/id_ed25519");
+var credentials = new SshCredentials(privateKey, "key-passphrase");
+
+// Port defaults to 22. Password authentication (user:password@host) is not supported.
+var uri = new Uri("ssh://user@docker-host");
+
 IDockerClientBuilder builder = new SshClientBuilder(credentials, uri);
 DockerClient client = new DockerClientConfiguration(builder).CreateClient();
 ```
 
-Allows specific implementation via IDockerClientBuilder
+### Custom transports with `IDockerClientBuilder`
 
-Currently available implementation: 
-1. NPipeClientBuilder: npipe
-2. ClientBuilder: http/https/tcp 
-3. UnixClientBuilder: unix
-4. SshClientBuilder: ssh
+`DockerClientConfiguration` accepts any `IDockerClientBuilder`, so you can pick the transport explicitly or supply your own implementation. Built-in builders (namespace `Docker.DotNet.HR.Extended.Models`):
+
+| Builder | Schemes |
+| --- | --- |
+| `NPipeClientBuilder` | `npipe://` |
+| `ClientBuilder` | `http://`, `https://`, `tcp://` |
+| `UnixClientBuilder` | `unix://` |
+| `SshClientBuilder` | `ssh://` |
 
 
 ## Accessing Docker API 
@@ -200,6 +210,8 @@ You can cancel streaming using the CancellationToken. On the other hand, if you 
 
 #### Example: HTTPS Authentication to Docker
 
+> **Note:** `Docker.DotNet.X509` and `Docker.DotNet.BasicAuth` are published by the upstream project and depend on the upstream `Docker.DotNet` package, not on this one. They are not currently published for HR.Extended.Docker.DotNet.
+
 If you are [running Docker with TLS (HTTPS)][docker-tls], you can authenticate to the Docker instance using the [**`Docker.DotNet.X509`**][Docker.DotNet.X509] package. You can get this package from NuGet or by running the following command in the “Package Manager Console”:
 
     PM> Install-Package Docker.DotNet.X509
@@ -270,40 +282,25 @@ Here are typical exceptions thrown from the client library:
 * **`ArgumentNullException`** is thrown when one of the required parameters are missing/empty.
     * Consider reading the [Docker Remote API reference][docker-remote-api] and source code of the corresponding method you are going to use in from this library. This way you can easily find out which parameters are required and their format.
 
-## .NET Foundation
-
-Docker.DotNet is a [.NET Foundation](https://www.dotnetfoundation.org) project.
-
-There are many .NET related projects on GitHub.
-
-- [.NET home repo](https://github.com/Microsoft/dotnet) - links to 100s of .NET projects, from Microsoft and the community.
-- [ASP.NET Core home](https://docs.microsoft.com/aspnet/core) - the best place to start learning about ASP.NET Core.
-
-This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](http://www.dotnetfoundation.org/code-of-conduct).
-
-General .NET OSS discussions: [.NET Foundation Discord](https://dotnetfoundation.org/socialize/discord)
-
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.dotnetfoundation.org.
+Issues and pull requests are welcome at [HaddysRosserrier/Docker.DotNet](https://github.com/HaddysRosserrier/Docker.DotNet).
+Changes that aren't specific to the extended features are better proposed upstream at [dotnet/Docker.DotNet](https://github.com/dotnet/Docker.DotNet).
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## Credits
 
+This package is a fork of [Docker.DotNet](https://github.com/dotnet/Docker.DotNet), a [.NET Foundation](https://www.dotnetfoundation.org) project.
 
 ## License
 
-Docker.DotNet is licensed under the [MIT](LICENSE) license.
+Licensed under the [MIT](LICENSE) license.
 
 ---------------
 Copyright (c) .NET Foundation and Contributors
 
 [docker-remote-api]: https://docs.docker.com/engine/reference/api/docker_remote_api/
 [docker-tls]: https://docs.docker.com/articles/https/
-[nuget]: http://www.nuget.org
-[nuget-gallery]: https://www.nuget.org/packages/Docker.DotNet/
+[nuget]: https://www.nuget.org
+[nuget-gallery]: https://www.nuget.org/packages/HR.Extended.Docker.DotNet/
 [Docker.DotNet.X509]: https://www.nuget.org/packages/Docker.DotNet.X509/
 [Docker.DotNet.BasicAuth]: https://www.nuget.org/packages/Docker.DotNet.BasicAuth/
