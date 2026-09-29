@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>HR.Extended.Docker.DotNet</PackageId>
-    <Description>Docker.DotNet is a library that allows you to interact with the Docker Remote API programmatically with fully asynchronous, non-blocking and object-oriented code in your .NET applications.</Description>
+    <Description>Extension of Docker.DotNet is a library that allows you to interact with the Docker Remote API programmatically with fully asynchronous, non-blocking and object-oriented code in your .NET applications.</Description>
     <AssemblyName>Docker.DotNet</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Ssh &amp; Custom Extended Docker.DotNet API pakage</Title>
-    <Authors>$(AssemblyName), HR</Authors>
+    <Title>Ssh &amp; Custom Extended Docker.DotNet API package</Title>
+    <Authors>HR</Authors>
     <PackageTags>Docker Container C# .NET Ssh</PackageTags>
   </PropertyGroup>
   <ItemGroup>
@@ -15,4 +15,4 @@
     <PackageReference Include="System.Net.Http.Json" Version="10.0.11" />
     <PackageReference Include="System.Text.Json" Version="10.0.11" />
   </ItemGroup>
-</Project>
+</Project>
